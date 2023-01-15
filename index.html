@@ -1,0 +1,21 @@
+<style>
+    body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+    }
+</style>
+<div style="position : relative">
+    <p style="position : absolute ; z-index: 10; color :white ; left : 10px ; top : 10px ; 
+          margin : 0 auto; font-family: sans-serif; font-size: 14px;">
+        <span>Score:</span>
+        <span id="score">0</span>
+    </p>
+    <span id="end" style="position : absolute ; color : white ; text-align: center ; width: 400px;
+                left: 50% ; top: 50% ; transform: translate(-50%, -50%);font-size: 50px;cursor: pointer;" onclick="again()">
+    </span>
+    <canvas></canvas>
+</div>
+<script src="index.js"></script>
