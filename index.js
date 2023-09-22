@@ -27,17 +27,17 @@ class Player {
             }
         }
     }
-    draw() {      
+    draw() {
         c.save();
         c.globalAlpha = this.opacity
         c.translate(
-            player.position.x + player.width / 2,
-            player.position.y + player.height / 2
+            this.position.x + this.width / 2,
+            this.position.y + this.height / 2
         )
         c.rotate(this.rotation);
         c.translate(
-            -player.position.x - player.width / 2,
-            -player.position.y - player.height / 2
+            -this.position.x - this.width / 2,
+            -this.position.y - this.height / 2
         )
 
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
@@ -125,7 +125,7 @@ class Invader {
 }
 //Effect when die 
 class Particle {
-    constructor({ position, velocity, radius, color ,fades}) {
+    constructor({ position, velocity, radius, color, fades }) {
         this.position = position
         this.velocity = velocity
         this.radius = radius
@@ -149,7 +149,7 @@ class Particle {
         this.draw()
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
-        if(this.fades){
+        if (this.fades) {
             this.opacity -= 0.01
         }
     }
@@ -227,6 +227,12 @@ const keys = {
     d: {
         pressed: false
     },
+    w: {
+        pressed: false
+    },
+    s: {
+        pressed: false
+    },
     space: {
         pressed: false
     }
@@ -240,7 +246,7 @@ let game = {
 }
 let score = 0
 
-function createParticles({object,color,fades}) {
+function createParticles({ object, color, fades }) {
     for (let i = 0; i < 15; i++) {
         particles.push(
             new Particle({
@@ -263,8 +269,8 @@ for (let i = 0; i < 100; i++) {
     particles.push(
         new Particle({
             position: {
-                x: Math.random()*canvas.width,
-                y: Math.random()*canvas.height
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height
             },
             velocity: {
                 x: 0,
@@ -276,7 +282,7 @@ for (let i = 0; i < 100; i++) {
 }
 
 function animate() {
-    if(!game.active) return;
+    if (!game.active) return;
     requestAnimationFrame(animate)
     c.fillStyle = 'black';
     c.fillRect(0, 0, canvas.width, canvas.height);
@@ -284,7 +290,7 @@ function animate() {
 
     particles.forEach((particle, i) => {
 
-        if(particle.position.y - particle.radius >= canvas.height) {
+        if (particle.position.y - particle.radius >= canvas.height) {
             particle.position.x = Math.random() * canvas.width
             particle.position.y = -particle.radius
         }
@@ -308,16 +314,16 @@ function animate() {
         if (invaderProjectile.position.y + invaderProjectile.height >= player.position.y
             && invaderProjectile.position.x + invaderProjectile.width >= player.position.x
             && invaderProjectile.position.x <= player.position.x + player.width) {
-            // console.log('u lose')
             setTimeout(() => {
                 invaderProjectiles.splice(index, 1)
-                player.opacity = 0  
+                player.opacity = 0
                 game.over = true
+                score = 0
             }, 0)
             setTimeout(() => {
                 game.active = false
-                End.innerHTML = 'Resart ?'
-            }, 2000)
+                End.innerHTML = 'Your score: ' + Score.innerHTML + '<br>Restart?'
+            }, 1000)
             createParticles({
                 object: player,
                 color: 'white',
@@ -338,7 +344,7 @@ function animate() {
     })
     grids.forEach((grid, gridIndex) => {
         grid.update()
-        if(game.over){
+        if (game.over) {
             grid.invaders = []
         }
         //invader attack player
@@ -386,9 +392,32 @@ function animate() {
                     }, 0)
                 }
             })
+        
+            // Check for player collision with invaders
+            if (
+                player.position.x < invader.position.x + invader.width &&
+                player.position.x + player.width > invader.position.x &&
+                player.position.y < invader.position.y + invader.height &&
+                player.position.y + player.height > invader.position.y
+            ) {
+                setTimeout(() => {
+                    player.opacity = 0
+                    game.over = true
+                    score = 0
+                }, 0)
+                setTimeout(() => {
+                    game.active = false
+                    End.innerHTML = 'Your score: ' + Score.innerHTML + '<br>Restart?'
+                }, 1000)
+                createParticles({
+                    object: player,
+                    color: 'white',
+                    fades: true
+                })
+            }
         })
     })
-    //mover player
+    // mover player
     if (keys.a.pressed && player.position.x >= 0) {
         player.velocity.x = -7
         player.rotation = -0.15
@@ -398,6 +427,14 @@ function animate() {
     } else {
         player.velocity.x = 0
         player.rotation = 0
+    }
+
+    if (keys.w.pressed && player.position.y > 0) {
+        player.velocity.y = -7;
+    } else if (keys.s.pressed && player.position.y + player.height < canvas.height) {
+        player.velocity.y = 7;
+    } else {
+        player.velocity.y = 0;
     }
 
     //spawning new enemies
@@ -411,14 +448,20 @@ function animate() {
 }
 animate();
 
-addEventListener('keydown', ({ key }) => { 
-    if(game.over) return
+addEventListener('keydown', ({ key }) => {
+    if (game.over) return
     switch (key) {
         case 'a':
             keys.a.pressed = true
             break
         case 'd':
             keys.d.pressed = true
+            break
+        case 'w':
+            keys.w.pressed = true
+            break
+        case 's':
+            keys.s.pressed = true
             break
         case ' ':
             projectiles.push(
@@ -445,13 +488,19 @@ addEventListener('keyup', ({ key }) => {
         case 'd':
             keys.d.pressed = false
             break
+        case 'w':
+            keys.w.pressed = false
+            break
+        case 's':
+            keys.s.pressed = false
+            break
         case ' ':
             break
     }
 
 })
 
-function again(){
+function again() {
     game.active = true
     game.over = false
     Score.innerHTML = 0
