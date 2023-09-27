@@ -1,5 +1,5 @@
 # Space_Invader
-Press A to move left , D to move right and space to attack
+Press A to move left , D to move right , W to move up , S to move down and space to attack
 
 # Demo
 
